@@ -34,6 +34,8 @@ const PANEL_WIDTH = 404
 const SIDEBAR_WIDTH = 344
 /** Share of the screen height the mobile bottom sheet may cover. */
 const SHEET_RATIO = 0.6
+/** Zoom when going to a pin: between city and street level. Deeper zooms are kept. */
+const PIN_ZOOM = 14
 
 const isMobile = (map: MapLibreMap) => map.getContainer().clientWidth < MOBILE_BREAKPOINT
 
@@ -101,7 +103,7 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
   }
 
   const flyToPin = (pin: Pin) =>
-    map.flyTo({ center: [pin.lng, pin.lat], zoom: Math.max(map.getZoom(), 5), offset: offsetFor(insets(true)) })
+    map.flyTo({ center: [pin.lng, pin.lat], zoom: Math.max(map.getZoom(), PIN_ZOOM), offset: offsetFor(insets(true)) })
 
   const flyToPlace = (place: PlaceResult) => {
     const { left, right, bottom } = insets(false)
@@ -328,7 +330,7 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
             label={pin.title}
             selected={pin.id === viewedPin?.id}
             onClick={() => {
-              if (view(pin)) revealPoint(pin.lng, pin.lat)
+              if (view(pin)) flyToPin(pin)
             }}
           />
         ))}
