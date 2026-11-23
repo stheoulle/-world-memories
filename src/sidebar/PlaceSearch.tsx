@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
-import { browserGeocodingLang, searchPlaces, type PlaceResult } from '../lib/geocoding'
+import { searchPlaces, type PlaceResult } from '../lib/geocoding'
+import { useI18n } from '../i18n/context'
 
 /** Spec §4.5: at least 500 ms between keystrokes and a request. */
 const DEBOUNCE_MS = 500
@@ -13,6 +14,7 @@ type SearchState =
 
 /** Search box that finds a place by name and flies the globe there (spec §4.5). */
 export function PlaceSearch({ onSelect }: { onSelect: (place: PlaceResult) => void }) {
+  const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
   const [search, setSearch] = useState<SearchState>({ status: 'idle' })
   const [open, setOpen] = useState(false)
@@ -29,7 +31,7 @@ export function PlaceSearch({ onSelect }: { onSelect: (place: PlaceResult) => vo
     const controller = new AbortController()
     const timer = setTimeout(() => {
       setSearch({ status: 'loading' })
-      searchPlaces(trimmed, browserGeocodingLang(), controller.signal)
+      searchPlaces(trimmed, lang, controller.signal)
         .then((results) => {
           setSearch({ status: 'done', results })
           setActive(0)
@@ -42,7 +44,7 @@ export function PlaceSearch({ onSelect }: { onSelect: (place: PlaceResult) => vo
       clearTimeout(timer)
       controller.abort()
     }
-  }, [trimmed, chosen])
+  }, [trimmed, chosen, lang])
 
   // Close the result list on a click outside.
   useEffect(() => {
@@ -94,11 +96,11 @@ export function PlaceSearch({ onSelect }: { onSelect: (place: PlaceResult) => vo
       <input
         type="search"
         role="combobox"
-        aria-label="Search a place"
+        aria-label={t.searchPlaceLabel}
         aria-expanded={showList}
         aria-controls={listId}
         aria-activedescendant={showList && results[active] ? `${listId}-${active}` : undefined}
-        placeholder="Search a place…"
+        placeholder={t.searchPlace}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value)
@@ -109,10 +111,10 @@ export function PlaceSearch({ onSelect }: { onSelect: (place: PlaceResult) => vo
       />
       {showList && (
         <ul className="place-search-results" id={listId} role="listbox">
-          {search.status === 'loading' && <li className="place-search-message">Searching…</li>}
-          {search.status === 'error' && <li className="place-search-message">Search is unavailable right now.</li>}
+          {search.status === 'loading' && <li className="place-search-message">{t.searching}</li>}
+          {search.status === 'error' && <li className="place-search-message">{t.searchUnavailable}</li>}
           {search.status === 'done' && results.length === 0 && (
-            <li className="place-search-message">No place found.</li>
+            <li className="place-search-message">{t.noPlaceFound}</li>
           )}
           {results.map((place, i) => (
             <li

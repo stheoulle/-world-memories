@@ -8,16 +8,18 @@ import { useSession } from './auth/useSession'
 import { Globe } from './globe/Globe'
 import { supabase } from './lib/supabase'
 import { PinWorkspace } from './pins/PinWorkspace'
+import { useI18n } from './i18n/context'
 
 export default function App() {
   const session = useSession()
+  const { lang } = useI18n()
   const [map, setMap] = useState<MapLibreMap | null>(null)
 
   const loggedIn = !!session
 
   return (
     <div className="app">
-      <Globe autoRotate={!loggedIn} onMapReady={setMap} />
+      <Globe autoRotate={!loggedIn} onMapReady={setMap} lang={lang} />
       {session === null && <LoginScreen />}
       {session && map && (
         // Keyed by user so all member state resets when a different user logs in.
@@ -34,6 +36,7 @@ type MemberAreaProps = {
 
 /** Everything shown to a logged-in member. */
 function MemberArea({ session, map }: MemberAreaProps) {
+  const { t } = useI18n()
   const { state, setProfile } = useProfile(session.user.id)
 
   if (state.status === 'loading') return null
@@ -41,9 +44,9 @@ function MemberArea({ session, map }: MemberAreaProps) {
     return (
       <div className="overlay">
         <div className="card">
-          <p className="form-error">Could not load your profile: {state.message}</p>
+          <p className="form-error">{t.profileLoadError(state.message)}</p>
           <button className="btn btn-secondary" onClick={() => supabase.auth.signOut()}>
-            Log out
+            {t.logOut}
           </button>
         </div>
       </div>

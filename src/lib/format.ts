@@ -1,3 +1,5 @@
+import type { Lang } from '../i18n/context'
+
 /** Formats a coordinate as e.g. `48.8566° N, 2.3522° E` (spec §4.2). */
 export function formatLatLng(lat: number, lng: number): string {
   const ns = lat >= 0 ? 'N' : 'S'
@@ -18,16 +20,14 @@ function parseIsoDate(iso: string): Date {
   return new Date(Date.UTC(y, m - 1, d))
 }
 
-const dayFormat = () => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' })
-
-/** e.g. "Mar 12, 2024" or "Mar 12 – 18, 2024" (localized). */
-export function formatDateRange(start: string, end: string | null): string {
-  const fmt = dayFormat()
+/** e.g. "May 1 – 4, 2025" / "1–4 mai 2025". */
+export function formatDateRange(start: string, end: string | null, lang: Lang): string {
+  const fmt = new Intl.DateTimeFormat(lang, { dateStyle: 'medium', timeZone: 'UTC' })
   if (!end || end === start) return fmt.format(parseIsoDate(start))
   return fmt.formatRange(parseIsoDate(start), parseIsoDate(end))
 }
 
 /** A timestamp (e.g. `updated_at`) as a localized date. */
-export function formatTimestamp(iso: string): string {
-  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(iso))
+export function formatTimestamp(iso: string, lang: Lang): string {
+  return new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }).format(new Date(iso))
 }

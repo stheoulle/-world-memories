@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Profile } from './useProfile'
+import { useI18n } from '../i18n/context'
+import { LanguageToggle } from '../i18n/LanguageToggle'
 
 type ProfileSetupProps = {
   email: string | undefined
@@ -9,6 +11,7 @@ type ProfileSetupProps = {
 
 /** Shown on first login: the member chooses the display name shown on their pins. */
 export function ProfileSetup({ email, onCreated }: ProfileSetupProps) {
+  const { t } = useI18n()
   const [name, setName] = useState(() => email?.split('@')[0] ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,10 +37,13 @@ export function ProfileSetup({ email, onCreated }: ProfileSetupProps) {
   return (
     <div className="overlay">
       <form className="card" onSubmit={handleSubmit}>
-        <h1 className="card-title">Welcome! 👋</h1>
-        <p className="card-subtitle">Choose the name other members will see on your pins.</p>
+        <div className="card-heading">
+          <h1 className="card-title">{t.welcome}</h1>
+          <LanguageToggle />
+        </div>
+        <p className="card-subtitle">{t.chooseName}</p>
         <label className="field">
-          <span>Display name</span>
+          <span>{t.displayName}</span>
           <input
             required
             autoFocus
@@ -49,7 +55,7 @@ export function ProfileSetup({ email, onCreated }: ProfileSetupProps) {
         </label>
         {error && <p className="form-error">{error}</p>}
         <button type="submit" className="btn btn-primary" disabled={saving || !name.trim()}>
-          {saving ? 'Saving…' : 'Continue'}
+          {saving ? t.saving : t.continue}
         </button>
       </form>
     </div>

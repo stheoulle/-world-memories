@@ -2,6 +2,8 @@ import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { formatLatLng } from '../lib/format'
 import { Panel } from '../ui/Panel'
 import { COMMENT_MAX, PLACE_MAX, TITLE_MAX, type PinInput } from './types'
+import { useI18n } from '../i18n/context'
+import type { Messages } from '../i18n/en'
 
 const EmojiPickerPopover = lazy(() => import('./EmojiPickerPopover'))
 
@@ -21,10 +23,10 @@ type PinFormProps = {
 }
 
 /** Returns why the draft cannot be saved, or null when it is valid. */
-function validatePin(draft: PinInput): string | null {
-  if (!draft.title.trim()) return 'A title is required.'
-  if (!draft.date_start) return 'A start date is required.'
-  if (draft.date_end && draft.date_end < draft.date_start) return 'The end date must be on or after the start date.'
+function validatePin(draft: PinInput, t: Messages): string | null {
+  if (!draft.title.trim()) return t.titleRequired
+  if (!draft.date_start) return t.startRequired
+  if (draft.date_end && draft.date_end < draft.date_start) return t.endBeforeStart
   return null
 }
 
@@ -39,11 +41,12 @@ export function PinForm({
   onSubmit,
   onCancel,
 }: PinFormProps) {
+  const { t } = useI18n()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const invalid = validatePin(draft)
+  const invalid = validatePin(draft, t)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -62,31 +65,31 @@ export function PinForm({
   }
 
   return (
-    <Panel label={isNew ? 'New pin' : 'Edit pin'}>
+    <Panel label={isNew ? t.newPin : t.editPin}>
       <form className="pin-form" onSubmit={handleSubmit}>
-        <h2 className="panel-title">{isNew ? 'New pin' : 'Edit pin'}</h2>
+        <h2 className="panel-title">{isNew ? t.newPin : t.editPin}</h2>
 
         <div className="field">
-          <span>Location</span>
+          <span>{t.location}</span>
           <div className="location-row">
             <span className="location-coords">
-              {picking ? 'Click on the globe to choose a new location…' : formatLatLng(draft.lat, draft.lng)}
+              {picking ? t.pickLocation : formatLatLng(draft.lat, draft.lng)}
             </span>
             <button type="button" className="btn btn-secondary btn-small" onClick={onTogglePicking}>
-              {picking ? 'Cancel' : 'Move'}
+              {picking ? t.cancel : t.move}
             </button>
           </div>
-          {!picking && <span className="field-hint">You can also drag the pin on the globe.</span>}
+          {!picking && <span className="field-hint">{t.dragHint}</span>}
         </div>
 
         <div className="field">
-          <label htmlFor="pin-place">Place</label>
+          <label htmlFor="pin-place">{t.place}</label>
           <div className="input-with-button">
             <input
               id="pin-place"
               value={draft.place_name ?? ''}
               maxLength={PLACE_MAX}
-              placeholder={lookingUp ? 'Looking up the place…' : 'e.g. Kyoto, Japan'}
+              placeholder={lookingUp ? t.lookingUpPlace : t.placePlaceholder}
               onChange={(e) => onChange({ place_name: e.target.value })}
             />
             <button
@@ -94,27 +97,27 @@ export function PinForm({
               className="btn btn-secondary btn-small"
               onClick={onLookUpPlace}
               disabled={lookingUp}
-              title="Fill in the place from the pin's location"
+              title={t.lookUpTitle}
             >
-              {lookingUp ? '…' : 'Look up'}
+              {lookingUp ? '…' : t.lookUp}
             </button>
           </div>
         </div>
 
         <div className="field-row">
           <div className="field emoji-field">
-            <span>Icon</span>
+            <span>{t.icon}</span>
             <button
               type="button"
               className="emoji-button"
-              aria-label={`Icon: ${draft.emoji}. Change`}
+              aria-label={t.changeIcon(draft.emoji)}
               aria-expanded={pickerOpen}
               onClick={() => setPickerOpen((open) => !open)}
             >
               {draft.emoji}
             </button>
             {pickerOpen && (
-              <Suspense fallback={<div className="emoji-popover emoji-picker-message">Loading…</div>}>
+              <Suspense fallback={<div className="emoji-popover emoji-picker-message">{t.loading}</div>}>
                 <EmojiPickerPopover
                   onSelect={(emoji) => {
                     onChange({ emoji })
@@ -127,7 +130,7 @@ export function PinForm({
           </div>
 
           <label className="field field-grow">
-            <span>Title</span>
+            <span>{t.title}</span>
             <input
               required
               autoFocus
@@ -140,7 +143,7 @@ export function PinForm({
 
         <div className="field-row">
           <label className="field field-grow">
-            <span>Start date</span>
+            <span>{t.startDate}</span>
             <input
               type="date"
               required
@@ -149,7 +152,7 @@ export function PinForm({
             />
           </label>
           <label className="field field-grow">
-            <span>End date (optional)</span>
+            <span>{t.endDate}</span>
             <input
               type="date"
               min={draft.date_start || undefined}
@@ -160,7 +163,7 @@ export function PinForm({
         </div>
 
         <label className="field">
-          <span>Comment</span>
+          <span>{t.comment}</span>
           <textarea
             rows={5}
             maxLength={COMMENT_MAX}
@@ -176,10 +179,10 @@ export function PinForm({
 
         <div className="panel-actions">
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>
-            Cancel
+            {t.cancel}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving || !!invalid}>
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? t.saving : t.save}
           </button>
         </div>
       </form>

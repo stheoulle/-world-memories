@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatDateRange } from '../lib/format'
 import { normalizeForSearch } from '../lib/text'
 import type { Pin } from '../pins/types'
+import { useI18n } from '../i18n/context'
 
 type SidebarProps = {
   pins: Pin[]
@@ -18,6 +19,7 @@ function matches(pin: Pin, query: string): boolean {
 
 /** List of all pins, newest first, with a text filter (spec §4.4). */
 export function Sidebar({ pins, loading, selectedId, onSelect, onClose }: SidebarProps) {
+  const { t, lang } = useI18n()
   const [filter, setFilter] = useState('')
   const query = normalizeForSearch(filter.trim())
   const visible = useMemo(() => (query ? pins.filter((pin) => matches(pin, query)) : pins), [pins, query])
@@ -31,16 +33,16 @@ export function Sidebar({ pins, loading, selectedId, onSelect, onClose }: Sideba
       ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [selectedId])
 
-  const count = query ? `${visible.length} of ${pins.length} pins` : `${pins.length} ${pins.length === 1 ? 'pin' : 'pins'}`
+  const count = query ? t.pinCountFiltered(visible.length, pins.length) : t.pinCount(pins.length)
 
   return (
-    <nav className="sidebar" aria-label="Pins">
+    <nav className="sidebar" aria-label={t.pinsLabel}>
       <div className="sidebar-header">
         <input
           type="search"
           className="sidebar-filter"
-          aria-label="Filter pins"
-          placeholder="Filter pins…"
+          aria-label={t.filterPinsLabel}
+          placeholder={t.filterPins}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           onKeyDown={(e) => {
@@ -50,11 +52,11 @@ export function Sidebar({ pins, loading, selectedId, onSelect, onClose }: Sideba
             }
           }}
         />
-        <button className="btn-icon sidebar-close" aria-label="Close the pin list" onClick={onClose}>
+        <button className="btn-icon sidebar-close" aria-label={t.closeList} onClick={onClose}>
           ✕
         </button>
       </div>
-      <p className="sidebar-count">{loading ? 'Loading pins…' : count}</p>
+      <p className="sidebar-count">{loading ? t.loadingPins : count}</p>
 
       <ul className="sidebar-list" ref={listRef}>
         {visible.map((pin) => (
@@ -71,7 +73,7 @@ export function Sidebar({ pins, loading, selectedId, onSelect, onClose }: Sideba
               <span className="sidebar-item-text">
                 <span className="sidebar-item-title">{pin.title}</span>
                 {pin.place_name && <span className="sidebar-item-sub">{pin.place_name}</span>}
-                <span className="sidebar-item-sub">{formatDateRange(pin.date_start, pin.date_end)}</span>
+                <span className="sidebar-item-sub">{formatDateRange(pin.date_start, pin.date_end, lang)}</span>
               </span>
             </button>
           </li>
@@ -79,10 +81,10 @@ export function Sidebar({ pins, loading, selectedId, onSelect, onClose }: Sideba
       </ul>
 
       {!loading && pins.length === 0 && (
-        <p className="sidebar-empty">No pins yet. Click anywhere on the globe to add the first one.</p>
+        <p className="sidebar-empty">{t.noPinsYet}</p>
       )}
       {!loading && pins.length > 0 && visible.length === 0 && (
-        <p className="sidebar-empty">No pin matches “{filter.trim()}”.</p>
+        <p className="sidebar-empty">{t.noMatch(filter.trim())}</p>
       )}
     </nav>
   )

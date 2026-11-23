@@ -6,13 +6,8 @@
 
 const PHOTON_URL = 'https://photon.komoot.io'
 
-/** Languages Photon can answer in; anything else falls back to local names. */
+/** Languages Photon can answer in; both UI languages are among them. */
 export type GeocodingLang = 'en' | 'fr'
-
-/** Until the UI language setting exists (milestone 5), follow the browser. */
-export function browserGeocodingLang(): GeocodingLang {
-  return navigator.language.toLowerCase().startsWith('fr') ? 'fr' : 'en'
-}
 
 type PhotonProperties = {
   osm_type?: string

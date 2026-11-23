@@ -1,7 +1,8 @@
-import { Map as MapLibreMap, NavigationControl, setWorkerUrl } from 'maplibre-gl'
+import { Map as MapLibreMap, NavigationControl, setWorkerUrl, type ExpressionSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { useEffect, useRef, useState } from 'react'
+import type { Lang } from '../i18n/context'
 
 // MapLibre v6 looks for its worker next to its own module file, which does not exist once
 // Vite has bundled it. Ship the (self-contained) worker as an asset and point MapLibre at it.
@@ -21,11 +22,37 @@ type GlobeProps = {
   onMapReady?: (map: MapLibreMap | null) => void
   /** Slowly spin the globe until the user interacts with it. */
   autoRotate?: boolean
+  /** Language of the map labels; places without a name in it keep the style's default. */
+  lang: Lang
 }
 
-export function Globe({ onMapReady, autoRotate = false }: GlobeProps) {
+/** The style's own label expressions, by layer id, captured before they are localized. */
+type LabelFields = Map<string, ExpressionSpecification>
+
+/** Shows `name:<lang>` where the map data has it, else the style's original label. */
+function localizeLabels(map: MapLibreMap, originals: LabelFields, lang: Lang) {
+  for (const [layerId, original] of originals) {
+    map.setLayoutProperty(layerId, 'text-field', ['coalesce', ['get', `name:${lang}`], original])
+  }
+}
+
+/** Collects the label layers that show a place name (not e.g. road numbers). */
+function captureLabelFields(map: MapLibreMap): LabelFields {
+  const originals: LabelFields = new Map()
+  for (const layer of map.getStyle().layers) {
+    if (layer.type !== 'symbol') continue
+    const field = map.getLayoutProperty(layer.id, 'text-field') as unknown
+    if (Array.isArray(field) && JSON.stringify(field).includes('"name')) {
+      originals.set(layer.id, field as ExpressionSpecification)
+    }
+  }
+  return originals
+}
+
+export function Globe({ onMapReady, autoRotate = false, lang }: GlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<MapLibreMap | null>(null)
+  const [labelFields, setLabelFields] = useState<LabelFields | null>(null)
 
   // Keep the latest callback in a ref so the map is created only once.
   const onMapReadyRef = useRef(onMapReady)
@@ -58,6 +85,7 @@ export function Globe({ onMapReady, autoRotate = false }: GlobeProps) {
         'fog-ground-blend': 0.9,
         'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
       })
+      setLabelFields(captureLabelFields(map))
     })
 
     setMap(map)
@@ -69,6 +97,10 @@ export function Globe({ onMapReady, autoRotate = false }: GlobeProps) {
       map.remove()
     }
   }, [])
+
+  useEffect(() => {
+    if (map && labelFields) localizeLabels(map, labelFields, lang)
+  }, [map, labelFields, lang])
 
   useEffect(() => {
     if (!map || !autoRotate) return

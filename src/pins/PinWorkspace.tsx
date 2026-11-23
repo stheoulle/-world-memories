@@ -4,13 +4,14 @@ import type { Profile } from '../auth/useProfile'
 import { UserMenu } from '../auth/UserMenu'
 import { PinMarker } from '../globe/PinMarker'
 import { todayIso } from '../lib/format'
-import { browserGeocodingLang, reverseGeocode, type PlaceResult } from '../lib/geocoding'
+import { reverseGeocode, type PlaceResult } from '../lib/geocoding'
 import { PlaceSearch } from '../sidebar/PlaceSearch'
 import { Sidebar } from '../sidebar/Sidebar'
 import { PinCard } from './PinCard'
 import { PinForm } from './PinForm'
 import { DEFAULT_EMOJI, type Pin, type PinInput } from './types'
 import { usePins } from './usePins'
+import { useI18n } from '../i18n/context'
 
 type EditingMode = {
   kind: 'editing'
@@ -75,12 +76,13 @@ type Insets = { left: number; right: number; bottom: number }
 
 /** Pins, sidebar, place search, and the create / view / edit / delete flows. */
 export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Profile }) {
+  const { t, lang } = useI18n()
   const { load, pins, create, update, remove } = usePins()
   const [mode, setMode] = useState<Mode>({ kind: 'idle' })
   const [sidebarOpen, setSidebarOpen] = useState(() => !isMobile(map))
 
   const dirty = hasChanges(mode)
-  const confirmDiscard = useCallback(() => !dirty || window.confirm('Discard your unsaved changes?'), [dirty])
+  const confirmDiscard = useCallback(() => !dirty || window.confirm(t.discardChanges), [dirty, t])
 
   // ----- Camera helpers -----
 
@@ -141,7 +143,7 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
     const controller = new AbortController()
     lookupRef.current = controller
     setLookingUp(true)
-    reverseGeocode(lat, lng, browserGeocodingLang(), controller.signal)
+    reverseGeocode(lat, lng, lang, controller.signal)
       .then((name) => {
         setMode((m) => {
           if (m.kind !== 'editing' || m.session !== session) return m
@@ -287,14 +289,14 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
         <div className="toolbar">
           <button
             className="btn-icon toolbar-toggle"
-            aria-label={sidebarOpen ? 'Hide the pin list' : 'Show the pin list'}
+            aria-label={sidebarOpen ? t.hideList : t.showList}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((open) => !open)}
           >
             ☰
           </button>
           <span className="app-title">
-            🌍 <span className="app-title-text">World Memories</span>
+            🌍 <span className="app-title-text">{t.appName}</span>
           </span>
         </div>
         <PlaceSearch onSelect={flyToPlace} />
@@ -343,7 +345,7 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
             lat={mode.draft.lat}
             lng={mode.draft.lng}
             emoji={mode.draft.emoji}
-            label={mode.draft.title || 'New pin'}
+            label={mode.draft.title || t.newPin}
             draft
             onDragEnd={moveDraft}
           />
@@ -376,7 +378,7 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
         />
       )}
 
-      {load.status === 'error' && <div className="toast toast-error">Could not load pins: {load.message}</div>}
+      {load.status === 'error' && <div className="toast toast-error">{t.couldNotLoadPins(load.message)}</div>}
     </>
   )
 }
