@@ -3,7 +3,7 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import { useState } from 'react'
 import { LoginScreen } from './auth/LoginScreen'
 import { ProfileSetup } from './auth/ProfileSetup'
-import { useProfile, type Profile } from './auth/useProfile'
+import { useProfile } from './auth/useProfile'
 import { useSession } from './auth/useSession'
 import { Globe } from './globe/Globe'
 import { supabase } from './lib/supabase'
@@ -18,12 +18,6 @@ export default function App() {
   return (
     <div className="app">
       <Globe autoRotate={!loggedIn} onMapReady={setMap} />
-      {loggedIn && (
-        <header className="app-header">
-          <span className="app-title">🌍 World Memories</span>
-        </header>
-      )}
-
       {session === null && <LoginScreen />}
       {session && map && (
         // Keyed by user so all member state resets when a different user logs in.
@@ -57,21 +51,5 @@ function MemberArea({ session, map }: MemberAreaProps) {
   }
   if (!state.profile) return <ProfileSetup email={session.user.email} onCreated={setProfile} />
 
-  return (
-    <>
-      <UserMenu profile={state.profile} />
-      <PinWorkspace map={map} />
-    </>
-  )
-}
-
-function UserMenu({ profile }: { profile: Profile }) {
-  return (
-    <div className="user-menu">
-      <span className="user-name">{profile.display_name}</span>
-      <button className="btn btn-link" onClick={() => supabase.auth.signOut()}>
-        Log out
-      </button>
-    </div>
-  )
+  return <PinWorkspace map={map} profile={state.profile} />
 }

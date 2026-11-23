@@ -10,8 +10,12 @@ type PinFormProps = {
   isNew: boolean
   /** True while the next map click sets the location. */
   picking: boolean
+  /** A place name lookup for the current location is in progress. */
+  lookingUp: boolean
   onChange: (patch: Partial<PinInput>) => void
   onTogglePicking: () => void
+  /** Replace the place name with the one found at the current location. */
+  onLookUpPlace: () => void
   onSubmit: () => Promise<void>
   onCancel: () => void
 }
@@ -24,7 +28,17 @@ function validatePin(draft: PinInput): string | null {
   return null
 }
 
-export function PinForm({ draft, isNew, picking, onChange, onTogglePicking, onSubmit, onCancel }: PinFormProps) {
+export function PinForm({
+  draft,
+  isNew,
+  picking,
+  lookingUp,
+  onChange,
+  onTogglePicking,
+  onLookUpPlace,
+  onSubmit,
+  onCancel,
+}: PinFormProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -65,15 +79,27 @@ export function PinForm({ draft, isNew, picking, onChange, onTogglePicking, onSu
           {!picking && <span className="field-hint">You can also drag the pin on the globe.</span>}
         </div>
 
-        <label className="field">
-          <span>Place</span>
-          <input
-            value={draft.place_name ?? ''}
-            maxLength={PLACE_MAX}
-            placeholder="e.g. Kyoto, Japan"
-            onChange={(e) => onChange({ place_name: e.target.value })}
-          />
-        </label>
+        <div className="field">
+          <label htmlFor="pin-place">Place</label>
+          <div className="input-with-button">
+            <input
+              id="pin-place"
+              value={draft.place_name ?? ''}
+              maxLength={PLACE_MAX}
+              placeholder={lookingUp ? 'Looking up the place…' : 'e.g. Kyoto, Japan'}
+              onChange={(e) => onChange({ place_name: e.target.value })}
+            />
+            <button
+              type="button"
+              className="btn btn-secondary btn-small"
+              onClick={onLookUpPlace}
+              disabled={lookingUp}
+              title="Fill in the place from the pin's location"
+            >
+              {lookingUp ? '…' : 'Look up'}
+            </button>
+          </div>
+        </div>
 
         <div className="field-row">
           <div className="field emoji-field">
