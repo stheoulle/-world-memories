@@ -1,4 +1,4 @@
-import { Map as MapLibreMap, NavigationControl, setWorkerUrl, type LngLat } from 'maplibre-gl'
+import { Map as MapLibreMap, NavigationControl, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { useEffect, useRef, useState } from 'react'
@@ -17,23 +17,19 @@ const DEFAULT_ZOOM = 1.6
 const ROTATION_SPEED = 4
 
 type GlobeProps = {
-  /** Fired on a click (never on a drag) with the clicked coordinates. */
-  onMapClick?: (lngLat: LngLat) => void
   /** Receives the map instance once it is created, and null when it is destroyed. */
   onMapReady?: (map: MapLibreMap | null) => void
   /** Slowly spin the globe until the user interacts with it. */
   autoRotate?: boolean
 }
 
-export function Globe({ onMapClick, onMapReady, autoRotate = false }: GlobeProps) {
+export function Globe({ onMapReady, autoRotate = false }: GlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<MapLibreMap | null>(null)
 
-  // Keep the latest callbacks in refs so the map is created only once.
-  const onMapClickRef = useRef(onMapClick)
+  // Keep the latest callback in a ref so the map is created only once.
   const onMapReadyRef = useRef(onMapReady)
   useEffect(() => {
-    onMapClickRef.current = onMapClick
     onMapReadyRef.current = onMapReady
   })
 
@@ -63,9 +59,6 @@ export function Globe({ onMapClick, onMapReady, autoRotate = false }: GlobeProps
         'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0],
       })
     })
-
-    // MapLibre's `click` is not fired after a drag, so dragging never creates pins.
-    map.on('click', (e) => onMapClickRef.current?.(e.lngLat))
 
     setMap(map)
     onMapReadyRef.current?.(map)

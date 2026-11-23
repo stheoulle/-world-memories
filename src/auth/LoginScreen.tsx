@@ -28,8 +28,15 @@ export function LoginScreen() {
 
     if (!error) {
       setStatus({ kind: 'sent', email: address })
+    } else if (error.code === 'over_email_send_rate_limit') {
+      // Project-wide hourly cap of Supabase's built-in email sender (a few emails per hour).
+      setStatus({
+        kind: 'error',
+        message: 'Too many login emails were sent recently. Please try again in an hour.',
+      })
     } else if (error.status === 429) {
-      setStatus({ kind: 'error', message: 'Too many attempts. Please wait a minute and try again.' })
+      // Per-address cooldown between two login emails.
+      setStatus({ kind: 'error', message: 'Please wait a minute before requesting another link.' })
     } else if (error.code === 'otp_disabled' || error.code === 'signup_disabled') {
       // Uninvited address: answer as for an invited one, so the form does not reveal who is a member.
       setStatus({ kind: 'sent', email: address })

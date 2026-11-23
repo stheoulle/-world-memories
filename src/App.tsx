@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js'
-import type { LngLat } from 'maplibre-gl'
+import type { Map as MapLibreMap } from 'maplibre-gl'
 import { useState } from 'react'
 import { LoginScreen } from './auth/LoginScreen'
 import { ProfileSetup } from './auth/ProfileSetup'
@@ -7,23 +7,17 @@ import { useProfile, type Profile } from './auth/useProfile'
 import { useSession } from './auth/useSession'
 import { Globe } from './globe/Globe'
 import { supabase } from './lib/supabase'
-
-/** Formats a coordinate as e.g. `48.8566° N, 2.3522° E` (spec §4.2). */
-function formatLngLat({ lng, lat }: LngLat): string {
-  const ns = lat >= 0 ? 'N' : 'S'
-  const ew = lng >= 0 ? 'E' : 'W'
-  return `${Math.abs(lat).toFixed(4)}° ${ns}, ${Math.abs(lng).toFixed(4)}° ${ew}`
-}
+import { PinWorkspace } from './pins/PinWorkspace'
 
 export default function App() {
   const session = useSession()
-  const [clicked, setClicked] = useState<LngLat | null>(null)
+  const [map, setMap] = useState<MapLibreMap | null>(null)
 
   const loggedIn = !!session
 
   return (
     <div className="app">
-      <Globe autoRotate={!loggedIn} onMapClick={loggedIn ? setClicked : undefined} />
+      <Globe autoRotate={!loggedIn} onMapReady={setMap} />
       {loggedIn && (
         <header className="app-header">
           <span className="app-title">🌍 World Memories</span>
@@ -31,9 +25,9 @@ export default function App() {
       )}
 
       {session === null && <LoginScreen />}
-      {session && (
+      {session && map && (
         // Keyed by user so all member state resets when a different user logs in.
-        <MemberArea key={session.user.id} session={session} clicked={clicked} />
+        <MemberArea key={session.user.id} session={session} map={map} />
       )}
     </div>
   )
@@ -41,11 +35,11 @@ export default function App() {
 
 type MemberAreaProps = {
   session: Session
-  clicked: LngLat | null
+  map: MapLibreMap
 }
 
 /** Everything shown to a logged-in member. */
-function MemberArea({ session, clicked }: MemberAreaProps) {
+function MemberArea({ session, map }: MemberAreaProps) {
   const { state, setProfile } = useProfile(session.user.id)
 
   if (state.status === 'loading') return null
@@ -66,8 +60,7 @@ function MemberArea({ session, clicked }: MemberAreaProps) {
   return (
     <>
       <UserMenu profile={state.profile} />
-      {/* Milestone 1 placeholder, replaced by pin creation in milestone 3. */}
-      {clicked && <div className="coord-readout">{formatLngLat(clicked.wrap())}</div>}
+      <PinWorkspace map={map} />
     </>
   )
 }
