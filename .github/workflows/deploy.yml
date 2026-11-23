@@ -24,11 +24,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Check Supabase variables are set
+        run: |
+          test -n "${{ vars.VITE_SUPABASE_URL }}" || { echo "::error::Repository variable VITE_SUPABASE_URL is missing"; exit 1; }
+          test -n "${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}" || { echo "::error::Repository variable VITE_SUPABASE_PUBLISHABLE_KEY is missing"; exit 1; }
       - run: npm run build
         env:
           # Repository Variables (Settings → Secrets and variables → Actions → Variables).
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -150,7 +150,7 @@ Sign-ups are disabled, so being **authenticated means being an invited member**.
 - `profiles`: `authenticated` can `select` all rows; `insert`/`update` only where `id = auth.uid()`.
 - `anon` role gets no access to either table.
 
-The Supabase URL and anon key are public by design and ship in the frontend bundle. Security relies entirely on RLS and on sign-ups being disabled.
+The Supabase URL and publishable key are public by design and ship in the frontend bundle. Security relies entirely on RLS and on sign-ups being disabled.
 
 ---
 
@@ -158,7 +158,7 @@ The Supabase URL and anon key are public by design and ship in the frontend bund
 
 - Repo: `world-memories` on GitHub. Pages source: GitHub Actions.
 - Workflow: on push to `main`, run `npm ci`, `npm run build` and deploy `dist/`.
-- Build-time env vars (repo **Variables**, not secrets, since they are public anyway): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
+- Build-time env vars (repo **Variables**, not secrets, since they are public anyway): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - Supabase Auth settings:
   - Site URL: `https://<user>.github.io/world-memories/`
   - Redirect URLs: the same, plus `http://localhost:5173/world-memories/` for development.
@@ -178,7 +178,7 @@ world-memories/
 ├─ README.md
 ├─ index.html
 ├─ vite.config.ts
-├─ .env.example                # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+├─ .env.example                # VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
 ├─ .github/workflows/deploy.yml
 ├─ supabase/migrations/0001_init.sql
 └─ src/
