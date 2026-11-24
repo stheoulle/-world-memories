@@ -32,7 +32,7 @@ Hosted on GitHub Pages, with Supabase handling auth and data.
 
 | Concern | Choice | Notes |
 |---|---|---|
-| Build | Vite + TypeScript | `base: '/world-memories/'` for GH Pages |
+| Build | Vite + TypeScript | Served from the root of a custom domain (`base: '/'`) |
 | UI | React 18+ | |
 | Globe/map | MapLibre GL JS v6 (`projection: 'globe'`), used directly through a small React wrapper (`src/globe/Globe.tsx`) | Vector tiles with labels; zoom from globe level down to street level |
 | Map tiles/style | OpenFreeMap (`liberty` style) | Free, no API key. Fallback: MapTiler free tier (needs a key) |
@@ -157,11 +157,12 @@ The Supabase URL and publishable key are public by design and ship in the fronte
 ## 6. Deployment
 
 - Repo: `world-memories` on GitHub. Pages source: GitHub Actions.
+- Custom domain: DNS on Cloudflare (CNAME to `<user>.github.io`, DNS only), set in the repo's Pages settings, HTTPS enforced.
 - Workflow: on push to `main`, run `npm ci`, `npm run build` and deploy `dist/`.
 - Build-time env vars (repo **Variables**, not secrets, since they are public anyway): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - Supabase Auth settings:
-  - Site URL: `https://<user>.github.io/world-memories/`
-  - Redirect URLs: the same, plus `http://localhost:5173/world-memories/` for development.
+  - Site URL: `https://<custom-domain>/`
+  - Redirect URLs: `https://<custom-domain>/**`, plus `http://localhost:5173/**` for development.
   - Sign-ups disabled.
   - Supabase's built-in email is heavily rate-limited (a few emails per hour), which is fine for the intended usage.
 - Supabase migrations live in `supabase/migrations/*.sql` so the schema can be recreated.
@@ -211,4 +212,3 @@ world-memories/
 - Should the map style follow the system's dark or light mode, or stay fixed?
 - Should a pin show a hover tooltip with its title on desktop, or only open on click?
 - Is an export or backup of all pins wanted (JSON/GeoJSON download)?
-- Should a custom domain be used instead of `<user>.github.io/world-memories`?

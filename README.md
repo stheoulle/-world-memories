@@ -7,9 +7,9 @@ See [SPEC.md](SPEC.md) for the full specification and milestones.
 
 ```sh
 npm install
-npm run dev       # http://localhost:5173/world-memories/
+npm run dev       # http://localhost:5173/
 npm run build     # type-check + production build into dist/
-npm run preview   # serve dist/ at http://localhost:4173/world-memories/
+npm run preview   # serve dist/ at http://localhost:4173/
 npm run lint
 ```
 
@@ -22,9 +22,8 @@ Copy `.env.example` to `.env` and fill in the Supabase project URL and publishab
 2. **Disable sign-ups:** Authentication → Sign In / Providers → turn off
    *Allow new users to sign up*. Keep the *Email* provider enabled.
 3. **Redirect URLs:** Authentication → URL Configuration
-   - Site URL: `https://<user>.github.io/world-memories/`
-   - Redirect URLs: `https://<user>.github.io/world-memories/`,
-     `http://localhost:5173/world-memories/`, `http://localhost:4173/world-memories/`
+   - Site URL: `https://<your-domain>/`
+   - Redirect URLs: `https://<your-domain>/**`, `http://localhost:5173/**`, `http://localhost:4173/**`
 4. **Invite members:** Authentication → Users → Add user → *Send invitation*.
    The invitation link logs them in and asks them to choose a display name.
    Afterwards they log in from the site with a magic link.
@@ -32,16 +31,25 @@ Copy `.env.example` to `.env` and fill in the Supabase project URL and publishab
 Supabase's built-in email sender allows only a few emails per hour, which is enough for a
 small group.
 
-## Deployment (GitHub Pages)
+## Deployment (GitHub Pages on a custom domain)
 
-1. Create a GitHub repository named **`world-memories`** and push to `main`.
-   If you use another name, update `base` in `vite.config.ts` to match.
-2. In the repository: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. Add the repository **Variables** `VITE_SUPABASE_URL` and
-   `VITE_SUPABASE_PUBLISHABLE_KEY` (Settings → Secrets and variables → Actions → Variables).
+1. Create a GitHub repository and push to `main`. On a free GitHub plan the repository must
+   be public for Pages to work.
+2. Repository **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+3. Add the repository **Variables** `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
+   (Settings → Secrets and variables → Actions → Variables).
+4. Run the workflow (push, or Actions → Deploy to GitHub Pages → Run workflow).
+5. **Cloudflare DNS** for the domain:
+   - Subdomain (e.g. `memories.example.com`): `CNAME memories → <github-user>.github.io`.
+   - Apex (`example.com`): `A @ → 185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
+     `185.199.111.153` (and optionally the `AAAA` records `2606:50c0:8000::153` … `8003::153`).
+   - Proxy status **DNS only** (grey cloud), so GitHub can issue the HTTPS certificate.
+6. Recommended: verify the domain on your GitHub account (Settings → Pages → Add a domain)
+   with the TXT record GitHub gives you; this stops anyone else from claiming it.
+7. Repository **Settings → Pages → Custom domain**: enter the domain, wait for the DNS check,
+   then tick **Enforce HTTPS** once it is offered (can take up to an hour).
 
 Every push to `main` builds and deploys through `.github/workflows/deploy.yml`.
-The site is then served at `https://<user>.github.io/world-memories/`.
 
 ## Notes
 
