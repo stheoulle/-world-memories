@@ -3,6 +3,7 @@ import { formatDateRange, formatTimestamp } from '../lib/format'
 import { Panel } from '../ui/Panel'
 import type { Pin } from './types'
 import { useI18n } from '../i18n/context'
+import { CloseIcon } from '../ui/icons'
 
 type PinCardProps = {
   pin: Pin
@@ -45,7 +46,7 @@ export function PinCard({ pin, onClose, onEdit, onFlyTo, onDelete }: PinCardProp
             {pin.place_name && <p className="pin-card-place">{pin.place_name}</p>}
           </div>
           <button className="btn-icon" aria-label={t.close} onClick={onClose}>
-            ✕
+            <CloseIcon />
           </button>
         </div>
 

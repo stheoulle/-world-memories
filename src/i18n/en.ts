@@ -15,7 +15,7 @@ export const en = {
   waitAMinute: 'Please wait a minute before requesting another link.',
 
   // Profile
-  welcome: 'Welcome! 👋',
+  welcome: 'Welcome!',
   chooseName: 'Choose the name other members will see on your pins.',
   displayName: 'Display name',
   continue: 'Continue',
@@ -37,6 +37,8 @@ export const en = {
   pinCountFiltered: (shown: number, total: number) => `${shown} of ${total} pins`,
   noPinsYet: 'No pins yet. Click anywhere on the globe to add the first one.',
   noMatch: (query: string) => `No pin matches “${query}”.`,
+  exportGeoJson: 'Export',
+  exportTitle: 'Download the listed pins as a GeoJSON file',
   couldNotLoadPins: (message: string) => `Could not load pins: ${message}`,
 
   // Place search

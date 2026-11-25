@@ -77,9 +77,10 @@ export function Globe({ onMapReady, autoRotate = false, lang }: GlobeProps) {
       map.setProjection({ type: 'globe' })
       // Atmosphere glow around the globe, fading out as we zoom in.
       map.setSky({
-        'sky-color': '#0b1a33',
-        'horizon-color': '#7fb4ff',
-        'fog-color': '#ffffff',
+        // Night-garden palette, see the theme variables in index.css.
+        'sky-color': '#0b110e',
+        'horizon-color': '#b7a2f5',
+        'fog-color': '#eef3ec',
         'sky-horizon-blend': 0.5,
         'horizon-fog-blend': 0.6,
         'fog-ground-blend': 0.9,

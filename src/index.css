@@ -1,11 +1,51 @@
+/* ==========================================================================
+   World Memories: "night garden" theme
+   Deep green-black surfaces, green for actions and selection, purple for
+   highlights (dates, the selected pin, the language toggle). Solid surfaces
+   with a fine grain instead of frosted glass; small, crisp corners.
+   ========================================================================== */
+
 :root {
-  --space: #05070d;
-  --panel-bg: rgba(12, 18, 32, 0.78);
-  --panel-fg: #eef2fa;
-  --panel-border: rgba(255, 255, 255, 0.12);
-  --accent: #7fb4ff;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Surfaces */
+  --bg: #0b110e;
+  --surface: #141d18;
+  --surface-raised: #1b2620;
+  --surface-hover: #22302a;
+  --line: #2a3a31;
+  --line-strong: #3c5044;
+
+  /* Text */
+  --text: #e6efe8;
+  --text-muted: #a3b4a8;
+  --text-faint: #74867a;
+
+  /* Accents */
+  --green: #639447;
+  --green-strong: #72a556; /* hover */
+  --green-ink: #0b110e; /* text on green: ~5:1 contrast, white would be too low */
+  --green-soft: rgba(99, 148, 71, 0.18);
+  --focus: #dfe7e0; /* thin off-white focus outline, no glow */
+  --purple: #a78bfa;
+  --purple-soft: rgba(167, 139, 250, 0.16);
+  --danger: #f28b82;
+  --danger-strong: #e5675d;
+
+  /* Shape & type */
+  --radius: 5px;
+  --radius-sm: 4px;
+  --font-sans: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Young Serif', Georgia, 'Times New Roman', serif;
+
+  /* Fine grain laid over surfaces (inline SVG noise, nothing to download). */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .09 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Crisp elevation: a hairline on top, a short dark drop. */
+  --elevation: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 14px 32px -14px rgba(0, 0, 0, 0.7);
+
+  font-family: var(--font-sans);
+  color: var(--text);
   color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
@@ -17,7 +57,7 @@ body,
 #root {
   margin: 0;
   height: 100%;
-  background: var(--space);
+  background: var(--bg);
   overflow: hidden;
 }
 
@@ -32,11 +72,46 @@ body,
 .app .globe {
   position: absolute;
   inset: 0;
-  /* Space behind the globe; the sky/atmosphere is drawn by MapLibre. */
-  background: radial-gradient(ellipse at center, #0c1426 0%, var(--space) 70%);
+  /* Night sky behind the globe: a faint purple dusk rising from below, plus grain.
+     The atmosphere itself is drawn by MapLibre (see Globe.tsx). */
+  background:
+    var(--grain),
+    radial-gradient(ellipse 90% 55% at 50% 115%, rgba(167, 139, 250, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 50% 45%, #121c17 0%, var(--bg) 75%);
 }
 
+/* Shared look of every floating surface. */
+.card,
+.panel,
+.sidebar,
+.toolbar,
+.user-menu,
+.toast,
+.place-search input,
+.place-search-results,
+.emoji-popover {
+  background-color: var(--surface);
+  background-image: var(--grain);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: var(--elevation);
+}
 
+/* Serif for names and titles. Young Serif has a single weight. */
+.card-title,
+.panel-title,
+.app-title,
+.sidebar-item-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+/* Keyboard focus: one consistent green ring. */
+:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: 2px;
+}
 
 /* ---------- Overlays & cards (login, profile setup) ---------- */
 
@@ -52,247 +127,100 @@ body,
 
 .card {
   pointer-events: auto;
-  width: min(380px, 100%);
+  width: min(390px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 24px;
-  border-radius: 14px;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  gap: 16px;
+  padding: 26px;
+  border-radius: var(--radius);
+  /* The purple hairline along the top edge. */
+  box-shadow: inset 0 1px 0 rgba(167, 139, 250, 0.45), var(--elevation);
 }
 
 .card p {
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.5;
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .card-title {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.card-title-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .card-subtitle {
-  opacity: 0.75;
+  color: var(--text-muted);
 }
+
+/* ---------- Form fields ---------- */
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
-.field input {
+.field > span:first-child,
+.field > label:first-child {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.field input,
+.field textarea,
+.sidebar-filter,
+.emoji-picker-search {
   font: inherit;
   font-size: 1rem; /* ≥16px avoids zoom-on-focus on iOS */
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--panel-fg);
-}
-
-.field input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.form-error {
-  color: #ff9b9b;
-  font-size: 0.9rem;
-}
-
-/* ---------- Buttons ---------- */
-
-.btn {
-  font: inherit;
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 10px 14px;
-  border: 1px solid transparent;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: #06101f;
-  font-weight: 600;
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--panel-fg);
-  border-color: var(--panel-border);
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--accent);
-  text-decoration: underline;
-}
-
-
-.user-name {
-  max-width: 30vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ---------- Pin markers ---------- */
-
-.pin-marker {
-  /* Reset button styles; MapLibre positions the element. */
-  all: unset;
-  cursor: pointer;
-  display: block;
-  padding-bottom: 8px; /* room for the tail */
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
-}
-
-.pin-marker-bubble {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid #fff;
-  font-size: 19px;
-  line-height: 1;
-  transition: transform 120ms ease;
-}
-
-/* Tail pointing at the exact location. */
-.pin-marker-bubble::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -9px;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top: 6px solid #fff;
-}
-
-.pin-marker:hover .pin-marker-bubble,
-.pin-marker:focus-visible .pin-marker-bubble {
-  transform: scale(1.12);
-}
-
-.pin-marker.is-selected .pin-marker-bubble {
-  border-color: var(--accent);
-  transform: scale(1.18);
-}
-.pin-marker.is-selected .pin-marker-bubble::after {
-  border-top-color: var(--accent);
-}
-
-.pin-marker.is-draft {
-  cursor: grab;
-}
-.pin-marker.is-draft .pin-marker-bubble {
-  border-color: var(--accent);
-  animation: pin-pulse 1.6s ease-out infinite;
-}
-.pin-marker.is-draft .pin-marker-bubble::after {
-  border-top-color: var(--accent);
-}
-
-@keyframes pin-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(127, 180, 255, 0.7);
-  }
-  100% {
-    box-shadow: 0 0 0 14px rgba(127, 180, 255, 0);
-  }
-}
-
-/* ---------- Panel: side panel on desktop, bottom sheet on mobile ---------- */
-
-.panel {
-  position: absolute;
-  z-index: 5; /* above MapLibre's controls (z-index 2), e.g. the attribution on mobile */
-  top: 64px;
-  right: 12px;
-  width: 380px;
-  max-height: calc(100% - 64px - 40px);
-  overflow-y: auto;
-  padding: 20px;
-  border-radius: 14px;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-@media (max-width: 639px) {
-  .panel {
-    top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    max-height: 60dvh;
-    border-radius: 16px 16px 0 0;
-    border-bottom: none;
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
-  }
-}
-
-.panel-title {
-  margin: 0;
-  font-size: 1.2rem;
-  overflow-wrap: anywhere;
-}
-
-.panel-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.panel-actions-confirm span {
-  margin-right: auto;
-  font-size: 0.9rem;
-}
-
-/* ---------- Pin form ---------- */
-
-.pin-form,
-.pin-card {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--text);
+  transition: border-color 120ms ease;
 }
 
 .field textarea {
-  font: inherit;
-  font-size: 1rem;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--panel-fg);
   resize: vertical;
+  line-height: 1.5;
 }
 
-.field textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.field input::placeholder,
+.field textarea::placeholder,
+.sidebar-filter::placeholder,
+.emoji-picker-search::placeholder,
+.place-search input::placeholder {
+  color: var(--text-faint);
+}
+
+.field input:hover,
+.field textarea:hover,
+.sidebar-filter:hover {
+  border-color: var(--line-strong);
+}
+
+.field input:focus,
+.field textarea:focus,
+.sidebar-filter:focus,
+.emoji-picker-search:focus,
+.place-search input:focus {
+  outline: none;
+  border-color: var(--focus);
 }
 
 .field input[type='date'] {
@@ -311,211 +239,121 @@ body,
 }
 
 .field-hint {
-  font-size: 0.8rem;
-  opacity: 0.6;
+  font-size: 0.78rem;
+  color: var(--text-faint);
 }
 
 .field-counter {
   align-self: flex-end;
-}
-
-.location-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
   font-variant-numeric: tabular-nums;
 }
 
-.emoji-field {
-  position: relative;
-}
-
-.emoji-button {
-  font-size: 1.5rem;
-  line-height: 1;
-  width: 46px;
-  height: 43px;
-  cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.emoji-button:focus-visible {
-  outline: 2px solid var(--accent);
-}
-
-/* ---------- Emoji picker (frimousse is unstyled) ---------- */
-
-.emoji-popover {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 10;
-  border-radius: 12px;
-  background: #121a2b;
-  border: 1px solid var(--panel-border);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
-}
-
-.emoji-picker {
-  display: flex;
-  flex-direction: column;
-  width: min(328px, calc(100vw - 48px));
-  height: 340px;
-}
-
-.emoji-picker-search {
-  margin: 8px;
-  font: inherit;
-  font-size: 1rem;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--panel-fg);
-}
-
-.emoji-picker-viewport {
-  position: relative;
-  flex: 1;
-  outline: none;
-}
-
-.emoji-picker-message {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+.form-error {
+  color: var(--danger);
   font-size: 0.9rem;
-  opacity: 0.7;
-  padding: 16px;
 }
 
-.emoji-picker-list {
-  padding-bottom: 8px;
-}
-
-.emoji-picker-category {
-  padding: 8px 10px 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  opacity: 0.7;
-  background: #121a2b;
-}
-
-.emoji-picker-emoji {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  font-size: 1.4rem;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-}
-
-.emoji-picker-emoji[data-active] {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* ---------- Pin card ---------- */
-
-.pin-card-header {
+.input-with-button {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
 }
 
-.pin-card-emoji {
-  font-size: 2.2rem;
-  line-height: 1;
-}
-
-.pin-card-heading {
+.input-with-button input {
   flex: 1;
   min-width: 0;
 }
 
-.pin-card-place {
-  margin: 2px 0 0;
-  opacity: 0.75;
-}
+/* ---------- Buttons ---------- */
 
-.pin-card-dates {
-  margin: 0;
+.btn {
+  font: inherit;
   font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  padding: 9px 15px;
+  border: 1px solid transparent;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
-.pin-card-comment {
-  margin: 0;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  line-height: 1.5;
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
-.pin-card-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.6;
+.btn-primary {
+  background: var(--green);
+  color: var(--green-ink);
 }
 
-/* ---------- Extra buttons ---------- */
+.btn-primary:not(:disabled):hover {
+  background: var(--green-strong);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.btn-secondary:not(:disabled):hover {
+  background: var(--surface-hover);
+}
 
 .btn-small {
   padding: 5px 10px;
   font-size: 0.85rem;
 }
 
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--green);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.btn-link:hover {
+  color: var(--green-strong);
+}
+
 .btn-danger {
-  background: #e5484d;
-  color: #fff;
-  font-weight: 600;
+  background: var(--danger-strong);
+  color: #1a0b09;
+}
+
+.btn-danger:not(:disabled):hover {
+  background: var(--danger);
 }
 
 .btn-danger-text {
-  color: #ff9b9b;
+  color: var(--danger);
 }
 
 .btn-icon {
-  font: inherit;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
   cursor: pointer;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: var(--radius-sm);
   border: none;
   background: transparent;
-  color: var(--panel-fg);
-  opacity: 0.7;
+  color: var(--text-muted);
 }
 
 .btn-icon:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-/* ---------- Toasts ---------- */
-
-.toast {
-  position: absolute;
-  z-index: 5;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100% - 32px);
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  font-size: 0.9rem;
-}
-
-.toast-error {
-  color: #ff9b9b;
+  color: var(--text);
+  background: var(--surface-hover);
 }
 
 /* ---------- Top bar: toolbar, place search, user menu ---------- */
@@ -542,18 +380,14 @@ body,
   align-items: center;
   gap: 8px;
   height: 42px;
-  padding: 0 12px 0 6px;
-  border-radius: 10px;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  backdrop-filter: blur(8px);
+  padding: 0 12px 0 5px;
+  border-radius: var(--radius);
   white-space: nowrap;
 }
 
 .user-menu {
   margin-left: auto;
-  padding: 0 14px;
+  padding: 0 12px;
   font-size: 0.9rem;
 }
 
@@ -561,14 +395,19 @@ body,
   max-width: 30vw;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text-muted);
 }
 
 .app-title {
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
 }
 
-.toolbar-toggle {
-  font-size: 1.1rem;
+.logo {
+  flex-shrink: 0;
+  display: block;
 }
 
 .place-search {
@@ -579,31 +418,22 @@ body,
 
 .place-search-icon {
   position: absolute;
-  z-index: 1; /* above the input, whose backdrop-filter creates its own layer */
-  left: 12px;
+  z-index: 1;
+  left: 11px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.85rem;
-  opacity: 0.7;
+  display: grid;
+  color: var(--text-faint);
   pointer-events: none;
 }
 
 .place-search input {
   width: 100%;
   height: 42px;
-  padding: 0 12px 0 34px;
+  padding: 0 12px 0 36px;
   font: inherit;
   font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--panel-border);
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  backdrop-filter: blur(8px);
-}
-
-.place-search input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  border-radius: var(--radius);
 }
 
 .place-search-results {
@@ -612,37 +442,618 @@ body,
   left: 0;
   right: 0;
   margin: 0;
-  padding: 6px;
+  padding: 4px;
   list-style: none;
-  border-radius: 10px;
-  background: #121a2b;
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius);
 }
 
 .place-search-result {
   display: flex;
   flex-direction: column;
+  gap: 1px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
 .place-search-result[aria-selected='true'] {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--green-soft);
 }
 
 .place-search-context {
   font-size: 0.8rem;
-  opacity: 0.65;
+  color: var(--text-muted);
 }
 
 .place-search-message {
   padding: 8px 10px;
   font-size: 0.9rem;
-  opacity: 0.7;
+  color: var(--text-muted);
 }
+
+/* ---------- Language toggle ---------- */
+
+.lang-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.lang-toggle-option {
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  min-width: 30px;
+  padding: 3px 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.lang-toggle-option:hover {
+  color: var(--text);
+}
+
+.lang-toggle-option[aria-pressed='true'] {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+/* ---------- Pin markers ---------- */
+
+.pin-marker {
+  /* Reset button styles; MapLibre positions the element. */
+  all: unset;
+  cursor: pointer;
+  display: block;
+  padding-bottom: 8px; /* room for the tail */
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+.pin-marker-bubble {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f1eee5;
+  border: 2px solid #f1eee5;
+  font-size: 19px;
+  line-height: 1;
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease;
+}
+
+/* Tail pointing at the exact location. */
+.pin-marker-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top: 6px solid #f1eee5;
+}
+
+.pin-marker:hover .pin-marker-bubble,
+.pin-marker:focus-visible .pin-marker-bubble {
+  transform: scale(1.12);
+}
+
+.pin-marker:focus-visible {
+  outline: none;
+}
+
+/* Selected pin: purple ring and glow. */
+.pin-marker.is-selected .pin-marker-bubble {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.35);
+  transform: scale(1.18);
+}
+.pin-marker.is-selected .pin-marker-bubble::after {
+  border-top-color: var(--purple);
+}
+
+/* Pin being created or edited: green, pulsing, draggable. */
+.pin-marker.is-draft {
+  cursor: grab;
+}
+.pin-marker.is-draft .pin-marker-bubble {
+  border-color: var(--green);
+  animation: pin-pulse 1.6s ease-out infinite;
+}
+.pin-marker.is-draft .pin-marker-bubble::after {
+  border-top-color: var(--green);
+}
+
+@keyframes pin-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 148, 71, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(99, 148, 71, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-marker.is-draft .pin-marker-bubble {
+    animation: none;
+    box-shadow: 0 0 0 4px var(--green-soft);
+  }
+}
+
+/* ---------- Panel: side panel on desktop, bottom sheet on mobile ---------- */
+
+.panel {
+  position: absolute;
+  z-index: 5; /* above MapLibre's controls (z-index 2), e.g. the attribution on mobile */
+  top: 64px;
+  right: 12px;
+  width: 380px;
+  max-height: calc(100% - 64px - 40px);
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: inset 0 1px 0 rgba(167, 139, 250, 0.45), var(--elevation);
+}
+
+@media (max-width: 639px) {
+  .panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 60dvh;
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  /* Grab handle, the usual cue that this is a sheet. */
+  .panel::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: -8px auto 12px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.panel-actions-confirm span {
+  margin-right: auto;
+  font-size: 0.9rem;
+}
+
+/* Sticky form actions: Save stays reachable in a long form. */
+.pin-form .panel-actions {
+  position: sticky;
+  bottom: -20px; /* the panel's padding, so the bar sits flush with its bottom edge */
+  margin: 0 -20px -20px;
+  padding: 12px 20px max(16px, env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- Pin form ---------- */
+
+.pin-form,
+.pin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.location-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.emoji-field {
+  position: relative;
+}
+
+.emoji-button {
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 46px;
+  height: 42px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+}
+
+.emoji-button:hover {
+  border-color: var(--line-strong);
+}
+
+/* ---------- Emoji picker (frimousse is unstyled) ---------- */
+
+.emoji-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.emoji-picker {
+  display: flex;
+  flex-direction: column;
+  width: min(328px, calc(100vw - 48px));
+  height: 340px;
+}
+
+.emoji-picker-search {
+  margin: 8px;
+  padding: 8px 10px;
+}
+
+.emoji-picker-viewport {
+  position: relative;
+  flex: 1;
+  outline: none;
+}
+
+.emoji-picker-message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  padding: 16px;
+}
+
+.emoji-picker-list {
+  padding-bottom: 8px;
+}
+
+.emoji-picker-category {
+  background-image: var(--grain);
+  padding: 8px 10px 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: var(--surface);
+}
+
+.emoji-picker-emoji {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  font-size: 1.4rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.emoji-picker-emoji[data-active] {
+  background: var(--green-soft);
+}
+
+/* On phones the picker is its own sheet (rendered at the body level). */
+.emoji-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  background: rgba(5, 8, 6, 0.6);
+}
+
+.emoji-popover.is-sheet {
+  position: fixed;
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  border-radius: 10px 10px 0 0;
+  border-bottom: none;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.emoji-popover.is-sheet .emoji-picker {
+  width: 100%;
+  height: min(60dvh, 420px);
+  align-items: center;
+}
+
+.emoji-popover.is-sheet .emoji-picker-search {
+  align-self: stretch;
+}
+
+/* ---------- Pin card ---------- */
+
+.pin-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pin-card-emoji {
+  font-size: 2.1rem;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.pin-card-heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.pin-card-place {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+/* Dates are the purple highlight of the card. */
+.pin-card-dates {
+  margin: 0;
+  color: var(--purple);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pin-card-comment {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--line-strong);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.pin-card-meta {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+/* ---------- Sidebar: left panel on desktop, drawer on mobile ---------- */
+
+.sidebar {
+  position: absolute;
+  z-index: 4;
+  top: 64px;
+  left: 12px;
+  bottom: 12px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 12px 0;
+}
+
+.sidebar-filter {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.sidebar-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 12px 6px 16px;
+}
+
+.sidebar-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.sidebar-export:not(:disabled):hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+
+.sidebar-export:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sidebar-count {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.sidebar-list {
+  flex: 1;
+  margin: 0;
+  padding: 0 6px 8px;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.sidebar-item {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background: var(--surface-hover);
+}
+
+.sidebar-item:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: -1px;
+}
+
+.sidebar-item.is-selected {
+  background: var(--green-soft);
+  border-left-color: var(--green);
+}
+
+.sidebar-item-emoji {
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.sidebar-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sidebar-item-title {
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.sidebar-item-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* The date line of each entry, in the highlight color. */
+.sidebar-item-sub:last-child {
+  color: var(--purple);
+}
+
+.sidebar-empty {
+  margin: 0;
+  padding: 8px 16px 16px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Toasts ---------- */
+
+.toast {
+  position: absolute;
+  z-index: 5;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.toast-error {
+  color: var(--danger);
+}
+
+/* ---------- MapLibre controls, matched to the theme ---------- */
+
+.maplibregl-ctrl-group {
+  background: var(--surface) !important;
+  border: 1px solid var(--line);
+  border-radius: var(--radius) !important;
+  box-shadow: var(--elevation) !important;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--line) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(0.9) sepia(0.2) hue-rotate(80deg);
+}
+
+.maplibregl-ctrl-group button:not(:disabled):hover {
+  background-color: var(--surface-hover) !important;
+}
+
+/* Map attribution: still visible (required by the data licenses), in the theme's colors.
+   Prefixed with `.app` to beat MapLibre's stylesheet, which loads after this one. */
+.app .maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.app .maplibregl-ctrl-attrib-inner {
+  color: var(--text-faint);
+}
+
+.app .maplibregl-ctrl-attrib a {
+  color: var(--text-muted);
+}
+
+.app .maplibregl-ctrl-attrib-button {
+  filter: invert(0.85);
+}
+
+/* The browser's own bold "×" in search fields clashes with the theme; Esc clears them. */
+input[type='search']::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* ---------- Responsive ---------- */
 
 @media (max-width: 899px) {
   .app-title-text {
@@ -666,222 +1077,6 @@ body,
     order: 3;
     flex: 1 1 100%;
   }
-}
-
-/* ---------- Sidebar: left panel on desktop, drawer on mobile ---------- */
-
-.sidebar {
-  position: absolute;
-  z-index: 4;
-  top: 64px;
-  left: 12px;
-  bottom: 12px;
-  width: 320px;
-  display: flex;
-  flex-direction: column;
-  border-radius: 14px;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-}
-
-.sidebar-backdrop {
-  display: none;
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 12px 0;
-}
-
-.sidebar-filter {
-  flex: 1;
-  min-width: 0;
-  font: inherit;
-  font-size: 1rem;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--panel-fg);
-}
-
-.sidebar-filter:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.sidebar-count {
-  margin: 8px 16px 6px;
-  font-size: 0.8rem;
-  opacity: 0.6;
-}
-
-.sidebar-list {
-  flex: 1;
-  margin: 0;
-  padding: 0 6px 8px;
-  list-style: none;
-  overflow-y: auto;
-}
-
-.sidebar-item {
-  all: unset;
-  box-sizing: border-box;
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.sidebar-item:focus-visible {
-  outline: 2px solid var(--accent);
-}
-
-.sidebar-item.is-selected {
-  background: rgba(127, 180, 255, 0.18);
-}
-
-.sidebar-item-emoji {
-  font-size: 1.4rem;
-  line-height: 1.2;
-}
-
-.sidebar-item-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.sidebar-item-title {
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.sidebar-item-sub {
-  font-size: 0.8rem;
-  opacity: 0.65;
-}
-
-.sidebar-empty {
-  margin: 0;
-  padding: 8px 16px 16px;
-  font-size: 0.9rem;
-  opacity: 0.7;
-}
-
-@media (max-width: 639px) {
-  .sidebar {
-    z-index: 20;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(85vw, 340px);
-    border-radius: 0 14px 14px 0;
-    padding-top: env(safe-area-inset-top);
-    background: rgba(12, 18, 32, 0.96);
-  }
-
-  .sidebar-backdrop {
-    display: block;
-    position: absolute;
-    inset: 0;
-    z-index: 19;
-    background: rgba(0, 0, 0, 0.45);
-  }
-}
-
-/* ---------- Misc form bits ---------- */
-
-.input-with-button {
-  display: flex;
-  gap: 8px;
-}
-
-.input-with-button input {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ---------- Language toggle ---------- */
-
-.card-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.lang-toggle {
-  display: inline-flex;
-  flex-shrink: 0;
-  padding: 2px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.lang-toggle-option {
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  min-width: 30px;
-  padding: 3px 6px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--panel-fg);
-  opacity: 0.6;
-  cursor: pointer;
-}
-
-.lang-toggle-option[aria-pressed='true'] {
-  background: var(--accent);
-  color: #06101f;
-  opacity: 1;
-}
-
-.lang-toggle-option:focus-visible {
-  outline: 2px solid var(--accent);
-}
-
-/* ---------- Sticky form actions: Save stays reachable in a long form ---------- */
-
-.pin-form .panel-actions {
-  position: sticky;
-  bottom: -20px; /* the panel's padding, so the bar sits flush with its bottom edge */
-  margin: 0 -20px -20px;
-  padding: 12px 20px max(16px, env(safe-area-inset-bottom));
-  background: rgba(14, 20, 34, 0.97);
-  border-top: 1px solid var(--panel-border);
-}
-
-/* ---------- Mobile bottom sheets ---------- */
-
-@media (max-width: 639px) {
-  /* Grab handle, the usual cue that this is a sheet. */
-  .panel::before {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 4px;
-    margin: -8px auto 12px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.25);
-  }
 
   .user-menu {
     gap: 8px;
@@ -891,36 +1086,25 @@ body,
   .user-name {
     max-width: 24vw;
   }
-}
 
-/* The emoji picker as its own sheet on phones (rendered at the body level). */
-.emoji-sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 29;
-  background: rgba(0, 0, 0, 0.45);
-}
+  .sidebar {
+    z-index: 20;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(85vw, 340px);
+    border-radius: 0 10px 10px 0;
+    border-left: none;
+    padding-top: env(safe-area-inset-top);
+  }
 
-.emoji-popover.is-sheet {
-  position: fixed;
-  top: auto;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
-  border-radius: 16px 16px 0 0;
-  padding-bottom: env(safe-area-inset-bottom);
-  color: var(--panel-fg);
-}
-
-.emoji-popover.is-sheet .emoji-picker {
-  width: 100%;
-  height: min(60dvh, 420px);
-  align-items: center;
-}
-
-.emoji-popover.is-sheet .emoji-picker-search {
-  align-self: stretch;
+  .sidebar-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 19;
+    background: rgba(5, 8, 6, 0.6);
+  }
 }
 
 /* Very narrow phones (e.g. 320px): drop the display name so the top bar stays on one row. */

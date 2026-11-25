@@ -18,7 +18,7 @@ export const fr: Messages = {
   waitAMinute: 'Patientez une minute avant de demander un autre lien.',
 
   // Profile
-  welcome: 'Bienvenue ! 👋',
+  welcome: 'Bienvenue !',
   chooseName: 'Choisissez le nom que les autres membres verront sur vos épingles.',
   displayName: 'Nom affiché',
   continue: 'Continuer',
@@ -40,6 +40,8 @@ export const fr: Messages = {
   pinCountFiltered: (shown, total) => `${shown} sur ${total} épingles`,
   noPinsYet: 'Aucune épingle pour l’instant. Cliquez n’importe où sur le globe pour ajouter la première.',
   noMatch: (query) => `Aucune épingle ne correspond à « ${query} ».`,
+  exportGeoJson: 'Exporter',
+  exportTitle: 'Télécharger les épingles listées dans un fichier GeoJSON',
   couldNotLoadPins: (message) => `Impossible de charger les épingles : ${message}`,
 
   // Place search

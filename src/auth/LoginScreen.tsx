@@ -3,6 +3,7 @@ import { useI18n } from '../i18n/context'
 import type { Messages } from '../i18n/en'
 import { LanguageToggle } from '../i18n/LanguageToggle'
 import { appUrl, initialAuthError, supabase } from '../lib/supabase'
+import { Logo } from '../ui/Logo'
 
 type Status =
   | { kind: 'idle' }
@@ -49,7 +50,10 @@ export function LoginScreen() {
     <div className="overlay">
       <form className="card" onSubmit={handleSubmit}>
         <div className="card-heading">
-          <h1 className="card-title">🌍 {t.appName}</h1>
+          <h1 className="card-title card-title-brand">
+            <Logo size={28} />
+            {t.appName}
+          </h1>
           <LanguageToggle />
         </div>
 

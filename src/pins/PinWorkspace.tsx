@@ -12,6 +12,8 @@ import { PinForm } from './PinForm'
 import { DEFAULT_EMOJI, type Pin, type PinInput } from './types'
 import { usePins } from './usePins'
 import { useI18n } from '../i18n/context'
+import { Logo } from '../ui/Logo'
+import { MenuIcon } from '../ui/icons'
 
 type EditingMode = {
   kind: 'editing'
@@ -293,10 +295,11 @@ export function PinWorkspace({ map, profile }: { map: MapLibreMap; profile: Prof
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((open) => !open)}
           >
-            ☰
+            <MenuIcon />
           </button>
           <span className="app-title">
-            🌍 <span className="app-title-text">{t.appName}</span>
+            <Logo size={22} />
+            <span className="app-title-text">{t.appName}</span>
           </span>
         </div>
         <PlaceSearch onSelect={flyToPlace} />

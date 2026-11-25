@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { searchPlaces, type PlaceResult } from '../lib/geocoding'
 import { useI18n } from '../i18n/context'
+import { SearchIcon } from '../ui/icons'
 
 /** Spec §4.5: at least 500 ms between keystrokes and a request. */
 const DEBOUNCE_MS = 500
@@ -90,8 +91,8 @@ export function PlaceSearch({ onSelect }: { onSelect: (place: PlaceResult) => vo
 
   return (
     <div className="place-search" ref={rootRef}>
-      <span className="place-search-icon" aria-hidden>
-        🔍
+      <span className="place-search-icon">
+        <SearchIcon />
       </span>
       <input
         type="search"

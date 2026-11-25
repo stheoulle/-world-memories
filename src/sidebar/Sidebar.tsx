@@ -3,6 +3,8 @@ import { formatDateRange } from '../lib/format'
 import { normalizeForSearch } from '../lib/text'
 import type { Pin } from '../pins/types'
 import { useI18n } from '../i18n/context'
+import { CloseIcon, DownloadIcon } from '../ui/icons'
+import { downloadGeoJson } from '../pins/geojson'
 
 type SidebarProps = {
   pins: Pin[]
@@ -53,10 +55,22 @@ export function Sidebar({ pins, loading, selectedId, onSelect, onClose }: Sideba
           }}
         />
         <button className="btn-icon sidebar-close" aria-label={t.closeList} onClick={onClose}>
-          ✕
+          <CloseIcon />
         </button>
       </div>
-      <p className="sidebar-count">{loading ? t.loadingPins : count}</p>
+      <div className="sidebar-count-row">
+        <p className="sidebar-count">{loading ? t.loadingPins : count}</p>
+        {/* Exports what the list shows: every pin, or only the matches while filtering. */}
+        <button
+          className="sidebar-export"
+          title={t.exportTitle}
+          disabled={loading || visible.length === 0}
+          onClick={() => downloadGeoJson(visible)}
+        >
+          <DownloadIcon />
+          {t.exportGeoJson}
+        </button>
+      </div>
 
       <ul className="sidebar-list" ref={listRef}>
         {visible.map((pin) => (
